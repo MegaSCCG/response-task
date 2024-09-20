@@ -6,21 +6,13 @@ let timeLimit = 60000; // 1 minute in milliseconds
 let startTime = null;
 let responseTimes = [];
 let reinforcerTimes = []; // Array to store times of reinforcement delivery
-let stimulusInterval;
 
-// Function to show stimulus
-function showStimulus() {
-    document.getElementById("stimulusButton").style.visibility = "visible";
-}
-
-// Function to hide stimulus after click
-function hideStimulus() {
-    document.getElementById("stimulusButton").style.visibility = "hidden";
-}
-
-// Function to handle stimulus click
-document.getElementById("stimulusButton").addEventListener("click", function() {
+// Function to handle button clicks
+document.getElementById("clickButton").addEventListener("click", function() {
     responseCount++;
+    
+    // Record the time of the response
+    responseTimes.push(new Date().getTime() - startTime);
     
     // Check for reinforcement delivery
     if (scheduleType === 'FR5' && responseCount >= nextReinforcement) {
@@ -31,23 +23,16 @@ document.getElementById("stimulusButton").addEventListener("click", function() {
         // Record the time of reinforcement delivery
         reinforcerTimes.push(new Date().getTime() - startTime);
     }
-    
-    // Record the time of the response
-    responseTimes.push(new Date().getTime() - startTime);
-    hideStimulus();
 });
 
 // Function to start the task
 function startTask() {
     startTime = new Date().getTime();
-    stimulusInterval = setInterval(showStimulus, 3000); // Show stimulus every 3 seconds
     setTimeout(endTask, timeLimit); // End task after 1 minute
 }
 
 // Function to end the task and show the cumulative graph
 function endTask() {
-    clearInterval(stimulusInterval);
-    document.getElementById("stimulusButton").style.visibility = "hidden";
     drawGraph();
 }
 
