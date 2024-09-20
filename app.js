@@ -10,10 +10,11 @@ let reinforcerTimes = []; // Array to store times of reinforcement delivery
 // Function to handle button clicks
 document.getElementById("clickButton").addEventListener("click", function() {
     responseCount++;
-    
-    // Record the time of the response
-    responseTimes.push(new Date().getTime() - startTime);
-    
+
+    // Record the time of the response (actual time since start of task)
+    let currentTime = new Date().getTime() - startTime;
+    responseTimes.push(currentTime); // Push the exact response time into responseTimes
+
     // Check for reinforcement delivery
     if (scheduleType === 'FR5' && responseCount >= nextReinforcement) {
         points++;
@@ -21,7 +22,7 @@ document.getElementById("clickButton").addEventListener("click", function() {
         document.getElementById("pointsDisplay").innerText = `Points: ${points}`;
         
         // Record the time of reinforcement delivery
-        reinforcerTimes.push(new Date().getTime() - startTime);
+        reinforcerTimes.push(currentTime); // Record the actual reinforcement delivery time
     }
 });
 
@@ -43,7 +44,7 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array of annotations (short vertical lines) for reinforcer times
+    // Create an array of annotations (vertical lines) for reinforcer times
     let annotations = reinforcerTimes.map((time) => {
         return {
             type: 'line',
@@ -54,11 +55,6 @@ function drawGraph() {
             borderWidth: 2, // Thickness of the line
             yMin: 0, // Start tick at the bottom of the y-axis
             yMax: 5, // Shorten the tick to end at y = 5 (1cm length visually on the graph)
-            label: {
-                content: 'R', // Optional label to show reinforcer
-                enabled: false, // Set to true to show the label
-                position: 'top'
-            }
         };
     });
 
