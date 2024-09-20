@@ -43,7 +43,7 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array of annotations (vertical lines) for reinforcer times
+    // Create an array of annotations (short vertical lines) for reinforcer times
     let annotations = reinforcerTimes.map((time) => {
         return {
             type: 'line',
@@ -52,8 +52,10 @@ function drawGraph() {
             value: (time / 1000).toFixed(1), // Reinforcer time in seconds
             borderColor: 'red',
             borderWidth: 2, // Thickness of the line
+            yMin: 0, // Start tick at the bottom of the y-axis
+            yMax: 5, // Shorten the tick to end at y = 5 (1cm length visually on the graph)
             label: {
-                content: 'R', // Label to show reinforcer
+                content: 'R', // Optional label to show reinforcer
                 enabled: false, // Set to true to show the label
                 position: 'top'
             }
@@ -85,8 +87,8 @@ function drawGraph() {
                     },
                     ticks: {
                         stepSize: 5, // Force ticks every 5 seconds
-                        callback: function(value, index, values) {
-                            return `${value}s`; // Show as seconds
+                        callback: function(value) {
+                            return `${value}s`; // Show time in seconds
                         }
                     },
                     min: 0,
