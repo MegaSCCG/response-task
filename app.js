@@ -43,13 +43,20 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array to store the reinforcer marker points
-    let reinforcerMarkers = reinforcerTimes.map((time) => {
-        // Find the index in responseTimes that corresponds to the reinforcer time
-        let responseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
+    // Create an array of annotations (vertical lines) for reinforcer times
+    let annotations = reinforcerTimes.map((time) => {
         return {
-            x: (time / 1000).toFixed(1), // Reinforcer delivery time in seconds
-            y: responseIndex + 1 // The corresponding cumulative response count
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x',
+            value: (time / 1000).toFixed(1), // Reinforcer time in seconds
+            borderColor: 'red',
+            borderWidth: 2, // Thickness of the line
+            label: {
+                content: 'R', // Label to show reinforcer
+                enabled: false, // Set to true to show the label
+                position: 'top'
+            }
         };
     });
 
@@ -58,7 +65,7 @@ function drawGraph() {
     let responseChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: responseTimes.map(time => (time / 1000).toFixed(1)), // Time in seconds
+            labels: responseTimes.map(time => (time / 1000).toFixed(1)), // Time points in seconds
             datasets: [
                 {
                     label: 'Cumulative Responses',
@@ -66,17 +73,6 @@ function drawGraph() {
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                     fill: false
-                },
-                {
-                    // Dataset for reinforcer markers (scatter plot)
-                    label: 'Reinforcer Delivery',
-                    data: reinforcerMarkers,
-                    backgroundColor: 'red',
-                    borderColor: 'red',
-                    type: 'scatter',
-                    pointStyle: 'rectRot',
-                    pointRadius: 6,
-                    showLine: false // Ensure no lines are drawn for reinforcers
                 }
             ]
         },
@@ -93,9 +89,8 @@ function drawGraph() {
                             return `${value}s`; // Show as seconds
                         }
                     },
-                    beginAtZero: true,
-                    suggestedMin: 0,
-                    suggestedMax: Math.ceil(Math.max(...responseTimes) / 5000) * 5 // Round to nearest 5 seconds
+                    min: 0,
+                    max: 60 // Limit the time axis to 60 seconds
                 },
                 y: {
                     beginAtZero: true,
@@ -106,6 +101,9 @@ function drawGraph() {
                 }
             },
             plugins: {
+                annotation: {
+                    annotations: annotations // Add the vertical line annotations for reinforcer markers
+                },
                 legend: {
                     display: true
                 }
