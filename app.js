@@ -11,7 +11,7 @@ let reinforcerTimes = []; // Array to store times of reinforcement delivery
 document.getElementById("clickButton").addEventListener("click", function() {
     responseCount++;
 
-    // Record the time of the response (actual time since start of task)
+    // Record the time of the response (accurately timestamped from start of task)
     let currentTime = new Date().getTime() - startTime;
     responseTimes.push(currentTime); // Push the exact response time into responseTimes
 
@@ -20,7 +20,7 @@ document.getElementById("clickButton").addEventListener("click", function() {
         points++;
         responseCount = 0; // Reset for the next cycle
         document.getElementById("pointsDisplay").innerText = `Points: ${points}`;
-        
+
         // Record the time of reinforcement delivery
         reinforcerTimes.push(currentTime); // Record the actual reinforcement delivery time
     }
@@ -28,7 +28,7 @@ document.getElementById("clickButton").addEventListener("click", function() {
 
 // Function to start the task
 function startTask() {
-    startTime = new Date().getTime();
+    startTime = new Date().getTime(); // Capture the start time of the task
     setTimeout(endTask, timeLimit); // End task after 1 minute
 }
 
@@ -44,17 +44,13 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array of annotations (vertical lines) for reinforcer times
-    let annotations = reinforcerTimes.map((time) => {
+    // Create an array of scatter plot points for reinforcer markers
+    let reinforcerMarkers = reinforcerTimes.map((time) => {
+        // Find the index in responseTimes that corresponds to the reinforcer time
+        let responseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
         return {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x',
-            value: (time / 1000).toFixed(1), // Reinforcer time in seconds
-            borderColor: 'red',
-            borderWidth: 2, // Thickness of the line
-            yMin: 0, // Start tick at the bottom of the y-axis
-            yMax: 5, // Shorten the tick to end at y = 5 (1cm length visually on the graph)
+            x: (time / 1000).toFixed(1), // Reinforcer time in seconds
+            y: responseIndex + 1 // The corresponding cumulative response count
         };
     });
 
@@ -71,44 +67,19 @@ function drawGraph() {
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
                     fill: false
-                }
-            ]
-        },
-        options: {
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time (seconds)'
-                    },
-                    ticks: {
-                        stepSize: 5, // Force ticks every 5 seconds
-                        callback: function(value) {
-                            return `${value}s`; // Show time in seconds
-                        }
-                    },
-                    min: 0,
-                    max: 60 // Limit the time axis to 60 seconds
                 },
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Cumulative Responses'
-                    }
+                {
+                    // Dataset for reinforcer markers (scatter plot)
+                    label: 'Reinforcer Delivery',
+                    data: reinforcerMarkers,
+                    backgroundColor: 'red',
+                    borderColor: 'red',
+                    type: 'scatter',
+                    pointStyle: 'rectRot', // Rotated rectangle markers
+                    pointRadius: 6,
+                    showLine: false // Ensure no lines are drawn for reinforcers
                 }
-            },
-            plugins: {
-                annotation: {
-                    annotations: annotations // Add the vertical line annotations for reinforcer markers
-                },
-                legend: {
-                    display: true
-                }
-            }
-        }
-    });
-}
+           
 
 // Start the task when the page loads
 window.onload = startTask;
