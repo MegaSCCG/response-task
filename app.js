@@ -43,13 +43,13 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array to store the reinforcer marker points
+    // Create an array to store the reinforcer marker points directly on the cumulative line
     let reinforcerMarkers = reinforcerTimes.map((time, index) => {
-        // Find the index in responseTimes closest to the reinforcer delivery time
-        let closestResponseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
+        // We ensure the marker is placed on the exact cumulative response
+        let responseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
         return {
-            x: (time / 1000).toFixed(1), // Reinforcer delivery time (x-axis)
-            y: closestResponseIndex + 1 // Corresponding cumulative response count (y-axis)
+            x: (time / 1000).toFixed(1), // Reinforcer delivery time (x-axis in seconds)
+            y: responseIndex + 1 // Corresponding cumulative response count (y-axis)
         };
     });
 
@@ -86,6 +86,9 @@ function drawGraph() {
                     title: {
                         display: true,
                         text: 'Time (seconds)'
+                    },
+                    ticks: {
+                        stepSize: 5, // Set x-axis ticks to every 5 seconds
                     }
                 },
                 y: {
