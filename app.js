@@ -58,6 +58,16 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
+    // Create an array to store the reinforcer marker points
+    let reinforcerMarkers = reinforcerTimes.map((time, index) => {
+        // Find the index in responseTimes closest to the reinforcer delivery time
+        let closestResponseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
+        return {
+            x: (time / 1000).toFixed(1), // Reinforcer delivery time (x-axis)
+            y: closestResponseIndex + 1 // Corresponding cumulative response count (y-axis)
+        };
+    });
+
     // Create the cumulative response line chart
     let ctx = document.getElementById('responseChart').getContext('2d');
     let responseChart = new Chart(ctx, {
@@ -73,9 +83,9 @@ function drawGraph() {
                     fill: false
                 },
                 {
-                    // Dataset for reinforcer markers
+                    // Dataset for reinforcer markers (scatter plot)
                     label: 'Reinforcer Delivery',
-                    data: reinforcerTimes.map(time => ({ x: (time / 1000).toFixed(1), y: cumulativeResponses.find((_, i) => responseTimes[i] >= time) })),
+                    data: reinforcerMarkers,
                     backgroundColor: 'red',
                     borderColor: 'red',
                     type: 'scatter',
