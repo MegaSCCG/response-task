@@ -5,6 +5,7 @@ let nextReinforcement = 5;
 let timeLimit = 60000; // 1 minute in milliseconds
 let startTime = null;
 let responseTimes = [];
+let reinforcerTimes = []; // Array to store times of reinforcement delivery
 let stimulusInterval;
 
 // Function to show stimulus
@@ -20,11 +21,17 @@ function hideStimulus() {
 // Function to handle stimulus click
 document.getElementById("stimulusButton").addEventListener("click", function() {
     responseCount++;
+    
+    // Check for reinforcement delivery
     if (scheduleType === 'FR5' && responseCount >= nextReinforcement) {
         points++;
         responseCount = 0; // Reset for the next cycle
         document.getElementById("pointsDisplay").innerText = `Points: ${points}`;
+        
+        // Record the time of reinforcement delivery
+        reinforcerTimes.push(new Date().getTime() - startTime);
     }
+    
     // Record the time of the response
     responseTimes.push(new Date().getTime() - startTime);
     hideStimulus();
@@ -48,20 +55,35 @@ function endTask() {
 function drawGraph() {
     let cumulativeResponses = [];
     for (let i = 0; i < responseTimes.length; i++) {
-        cumulativeResponses.push(i + 1);
+        cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
+    // Create the cumulative response line chart
     let ctx = document.getElementById('responseChart').getContext('2d');
     let responseChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: responseTimes.map(time => (time / 1000).toFixed(1) + 's'),
-            datasets: [{
-                label: 'Cumulative Responses',
-                data: cumulativeResponses,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
+            labels: responseTimes.map(time => (time / 1000).toFixed(1) + 's'), // Time points in seconds
+            datasets: [
+                {
+                    label: 'Cumulative Responses',
+                    data: cumulativeResponses,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                },
+                {
+                    // Dataset for reinforcer markers
+                    label: 'Reinforcer Delivery',
+                    data: reinforcerTimes.map(time => ({ x: (time / 1000).toFixed(1), y: cumulativeResponses.find((_, i) => responseTimes[i] >= time) })),
+                    backgroundColor: 'red',
+                    borderColor: 'red',
+                    type: 'scatter',
+                    pointStyle: 'rectRot',
+                    pointRadius: 6,
+                    showLine: false // Ensure no lines are drawn for reinforcers
+                }
+            ]
         },
         options: {
             scales: {
@@ -77,6 +99,11 @@ function drawGraph() {
                         display: true,
                         text: 'Cumulative Responses'
                     }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true
                 }
             }
         }
