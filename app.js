@@ -43,13 +43,13 @@ function drawGraph() {
         cumulativeResponses.push(i + 1); // Cumulative response count
     }
 
-    // Create an array to store the reinforcer marker points directly on the cumulative line
-    let reinforcerMarkers = reinforcerTimes.map((time, index) => {
-        // We ensure the marker is placed on the exact cumulative response
+    // Create an array to store the reinforcer marker points
+    let reinforcerMarkers = reinforcerTimes.map((time) => {
+        // Find the index in responseTimes that corresponds to the reinforcer time
         let responseIndex = responseTimes.findIndex(responseTime => responseTime >= time);
         return {
-            x: (time / 1000).toFixed(1), // Reinforcer delivery time (x-axis in seconds)
-            y: responseIndex + 1 // Corresponding cumulative response count (y-axis)
+            x: (time / 1000).toFixed(1), // Reinforcer delivery time in seconds
+            y: responseIndex + 1 // The corresponding cumulative response count
         };
     });
 
@@ -58,7 +58,7 @@ function drawGraph() {
     let responseChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: responseTimes.map(time => (time / 1000).toFixed(1) + 's'), // Time points in seconds
+            labels: responseTimes.map(time => (time / 1000).toFixed(1)), // Time in seconds
             datasets: [
                 {
                     label: 'Cumulative Responses',
@@ -88,8 +88,14 @@ function drawGraph() {
                         text: 'Time (seconds)'
                     },
                     ticks: {
-                        stepSize: 5, // Set x-axis ticks to every 5 seconds
-                    }
+                        stepSize: 5, // Force ticks every 5 seconds
+                        callback: function(value, index, values) {
+                            return `${value}s`; // Show as seconds
+                        }
+                    },
+                    beginAtZero: true,
+                    suggestedMin: 0,
+                    suggestedMax: Math.ceil(Math.max(...responseTimes) / 5000) * 5 // Round to nearest 5 seconds
                 },
                 y: {
                     beginAtZero: true,
